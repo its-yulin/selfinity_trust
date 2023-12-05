@@ -1,15 +1,14 @@
-# fastGPT
-*A FastAPI based version of [flaskGPT](https://github.com/AVGVSTVS96/flaskGPT) using asynchronous requests for improved performance*
+# Selfinity_Trust: Personal Database
+### Author: Yulin Hu, Yijun Liu
 
-fastGPT a high performance, customizable GPT chat application built with FastAPI and OpenAI's API. It implements several features essential to providing an excellent user experience, in addition to performance improvements over the [Flask version](https://github.com/AVGVSTVS96/flaskGPT), and features a simple frontend UI built with HTML, CSS, and JavaScript
-## Features
-- 📝 Full conversation history functionality
-- 🤖 Chat with the GPT-3.5 & GPT-4 models
-- 🧰 Change system message in realtime from UI
-- 💬 Real-time response character streaming functionality
-- 🧩 Markdown support in both user and assistant messages
-- 🎨 Syntax highligting for code blocks with automatic language detection
-- ⚙️ Automatic scrolling with new messages, cancellable by scrolling up 
+<img width="958" alt="demo screenshot" src="https://github.com/its-yulin/selfinity_trust/assets/91909405/7df1acda-3ca8-4e3f-b6c9-4fce59a738f1">
 
-<img width="939" alt="Screenshot of App" src="https://github.com/AVGVSTVS96/flaskGPT/assets/122117267/a977018a-10d5-4c5c-9211-b5fbe1b15c01">
+## 🎉New features
+This adapted version aims to improve user trust and model reliability by...
+- Differentiate user command types
+- Run logic check
+- Provide downloadable evidence (raw data)
+
+## 💎 What it does
+Our AI assistant serves as a comprehensive digital life co-pilot, redefining the way we interact with our digital lives. Its capabilities go beyond mere data consolidation; it actively assists in managing and interpreting information. Check out the original version here: https://github.com/its-yulin/Selfinity_AI
 
