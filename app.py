@@ -57,7 +57,7 @@ PINECONE_API_ENV = ''
 OPENAI_API_KEY = ''
 PLAID_CLIENT_ID = ''
 PLAID_SANDBOX = ''
-user_name = ''
+user_name = ""
 CHUNK_SIZE = 2000
 
 '''
@@ -330,7 +330,7 @@ def generate_evidence(evidence, response):
 
 
 def check_greetings(response):
-    counter_evidence_prompt = f"Can you check whether this is an answer to greetings/chitchat? '{response['result']}'? " \
+    counter_evidence_prompt = f"Can you check whether this is an answer to greetings (like how are you), chitchat, giving/replying to thanks or include anything saying that I'm just an AI? '{response['result']}'? " \
                               "Return only yes or no."
     counter_evidence = openai.ChatCompletion.create(
         model="gpt-4",
@@ -338,7 +338,6 @@ def check_greetings(response):
         max_tokens=100
     )
     answer = counter_evidence["choices"][0]["message"]["content"]
-    print("yesyes")
 
     return answer.lower().strip() == "yes"
 
@@ -403,7 +402,7 @@ async def generate(messages: List[Message], model_type: str):
             if(check_greetings(response)):
                 source_type = "greeting"
                 source_value = "greeting"
-                explain = '{"trust_type": "yes", "explanation": "This is a greeting."}'
+                explain = '{"trust_type": "yes", "explanation": "There are no factual contents here :)"}'
                 is_greeting = create_response_object(response['result'], source_type, source_value, explain)
                 yield is_greeting
                 return
