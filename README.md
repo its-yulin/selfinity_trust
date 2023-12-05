@@ -12,3 +12,9 @@ This adapted version aims to improve user trust and model reliability by...
 ## 💎 What it does
 Our AI assistant serves as a comprehensive digital life co-pilot, redefining the way we interact with our digital lives. Its capabilities go beyond mere data consolidation; it actively assists in managing and interpreting information. Check out the original version here: https://github.com/its-yulin/Selfinity_AI
 
+## 💻 Brief Code Documentation
+The main backend function is located in the [app.py](/app.py). It contains all necessary functions for this project. 
+Specifically for this course, the functions we improved are in the <pre>generate()</pre> and its auxiliary functions.
+The frontend files are located in two separate folders. The [templates](./templates) have the HTML skeletons. The [static](./static) has the CSS as well as JS files for the front end. 
+To run this project locally, please 1) download the project 2) install the packages in requirements.txt 3) insert your PINECONE_API_KEY, OPENAI_API_KEY, and PLAID_CLIENT_ID 4) run app.py file. 
+
