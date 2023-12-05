@@ -47,13 +47,13 @@ count = 0
 
 load_dotenv()
 
-PINECONE_API_KEY = 'f220ff6b-e008-45a6-8212-32d5584711a9'
-PINECONE_API_ENV = 'gcp-starter'
+PINECONE_API_KEY = ''
+PINECONE_API_ENV = ''
 
-OPENAI_API_KEY = "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"
-PLAID_CLIENT_ID = '6552c58ad0f736001b34d076'
-PLAID_SANDBOX = '3869373652cef826e2306c501ccfc7'
-user_name = "yulin"
+OPENAI_API_KEY = ''
+PLAID_CLIENT_ID = ''
+PLAID_SANDBOX = ''
+user_name = ''
 CHUNK_SIZE = 2000
 
 embeddings = OpenAIEmbeddings(openai_api_key=OPENAI_API_KEY)
@@ -298,7 +298,7 @@ def find_type(metadata):
 
 
 def generate_evidence(evidence, response):
-    counter_evidence_prompt = f"Given the evidence '{evidence}', is this statement accurate: '{response['result']}'? Provide explanation. " \
+    counter_evidence_prompt = f"Given the evidence '{evidence}', is this statement accurate: '{response['result']}'? Provide explanation within 30 words. " \
                               "Return in json format in the form of {\"trust_type\":\"yes/no\", \"explanation\": \"explanation\"}"
 
     counter_evidence = openai.ChatCompletion.create(
@@ -313,14 +313,18 @@ def generate_evidence(evidence, response):
 
 
 def check_greetings(response):
-    counter_evidence_prompt = f"Can you check whether this is an answer to greetings/chitchat?'{response['result']}'? " \
-                              "Return in json format in the form of {\"answer\":\"yes/no\"}"
+    counter_evidence_prompt = f"Can you check whether this is an answer to greetings/chitchat? '{response['result']}'? " \
+                              "Return only yes or no."
     counter_evidence = openai.ChatCompletion.create(
         model="gpt-4",
         messages=[{"role": "system", "content": counter_evidence_prompt}],
         max_tokens=100
     )
-    return counter_evidence["choices"][0]["message"]["content"]
+    answer = counter_evidence["choices"][0]["message"]["content"]
+    print("yesyes")
+
+    return answer.lower().strip() == "yes"
+
 
 
 def most_common(metadata_types):
@@ -337,26 +341,22 @@ def filter_by_most_common(metadata_container, metadata_types, source_type):
 def filter_and_save_transactions(file_path, output_file_name, metadata_container_filtered):
     with open(file_path, 'r') as file:
         data = json.load(file)
-
-    # Convert seq_nums to zero-based index
     seq_nums = {int(item['seq_num']) - 1 for item in metadata_container_filtered}
-
-    # Filter transactions based on their index
     if "chunk" in data:
         filtered_transactions = [data["chunk"][i] for i in seq_nums if i < len(data["chunk"])]
     else:
         filtered_transactions = []
 
-    with open(output_file_name, 'w') as outfile:
+    output_file_name_real = "./static/" + output_file_name
+
+    with open(output_file_name_real, 'w') as outfile:
         json.dump(filtered_transactions, outfile, indent=4)
 
-    output_file_path = os.path.abspath(output_file_name)
-
-    return {output_file_name: output_file_path}
+    return {output_file_name: output_file_name_real}
 
 
 def find_title(metadata_container_filtered):
-    titles_paths = {source.split('/')[-1].replace('.pdf', ''): "../" + source for item in metadata_container_filtered for source in [item['source']]}
+    titles_paths = {source.split('/')[-1].replace('.pdf', ''): 'static/' + source for item in metadata_container_filtered for source in [item['source']]}
     json_output = json.dumps(titles_paths, indent=None)
     return json_output
 
@@ -382,6 +382,14 @@ async def generate(messages: List[Message], model_type: str):
             yield response
         else:
             response = rag_pipeline(current_query)
+
+            if(check_greetings(response)):
+                source_type = "greeting"
+                source_value = "greeting"
+                explain = '{"trust_type": "yes", "explanation": "This is a greeting."}'
+                is_greeting = create_response_object(response['result'], source_type, source_value, explain)
+                yield is_greeting
+                return
 
             results = vector_store.similarity_search(current_query, k=8)
             evidence = ""

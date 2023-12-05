@@ -103,7 +103,7 @@ function addTrustAndSourceToDiv(messageText, trust_label, trust_value, source_ty
     sourceInfo.className = "source-info";
 
     switch (source_type) {
-        case 'bookmark':
+        case 'link':
             let bookmarkLabel = document.createElement("p");
             bookmarkLabel.textContent = "Source: Bookmarks";
             sourceInfo.appendChild(bookmarkLabel);
@@ -126,19 +126,19 @@ function addTrustAndSourceToDiv(messageText, trust_label, trust_value, source_ty
             sourceInfo.appendChild(transactionLabel);
 
             let transactionLink = document.createElement("a");
-            transactionLink.href = source_value;
+            transactionLink.href = '/static/my_transaction.json';
             transactionLink.textContent = "download relevant transactions";
             transactionLink.download = "";
             sourceInfo.appendChild(transactionLink);
             break;
 
-        case 'gmail':
+        case 'email':
             let gmailLabel = document.createElement("p");
             gmailLabel.textContent = "Source: Gmail";
             sourceInfo.appendChild(gmailLabel);
 
             let gmailLink = document.createElement("a");
-            gmailLink.href = source_value;
+            gmailLink.href = '/static/my_email.json';
             gmailLink.textContent = "download relevant emails";
             gmailLink.download = "";
             sourceInfo.appendChild(gmailLink);
@@ -153,6 +153,7 @@ function addTrustAndSourceToDiv(messageText, trust_label, trust_value, source_ty
             for (const [pdfName, path] of Object.entries(JSON.parse(source_value))) {
                 let listItem = document.createElement("li");
                 let anchor = document.createElement("a");
+                console.log(path)
                 anchor.href = path;
                 anchor.textContent = pdfName;
                 anchor.download = "";
@@ -164,7 +165,7 @@ function addTrustAndSourceToDiv(messageText, trust_label, trust_value, source_ty
 
         default:
             let unsupportedLabel = document.createElement("p");
-            unsupportedLabel.textContent = "Unsupported source type";
+            unsupportedLabel.textContent = "No sources, sorry!";
             sourceInfo.appendChild(unsupportedLabel);
     }
 
