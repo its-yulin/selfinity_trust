@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Select Services</title>
+    <script src="https://cdn.plaid.com/link/v2/stable/link-initialize.js"></script>
+</head>
+<body>
+    <form action="/chat" method="get">
+        <input type="checkbox" name="service" value="service1"> Web History<br>
+        <input type="checkbox" name="service" value="service2"> Bank Transaction Data<br>
+        <input type="checkbox" name="service" value="service3"> Email<br>
+        <input type="checkbox" name="service" value="service4"> PDFs<br>
+<!--        <input type="submit" value="Next">-->
+        <button type="button" id="linkButton">Build Personal Database</button>
+        <button type="button" id="linkButton2" style="display: none;">Ask Anything</button>
+    </form>
+<!--    <script>-->
+<!--        document.getElementById('linkButton').addEventListener('click', function() {-->
+<!--        const selectedServices = Array.from(document.querySelectorAll('input[name="service"]:checked')).map(input => input.value);-->
+<!--        console.log("start");-->
+<!--        fetch('http://127.0.0.1:8000/selected_services', {-->
+<!--            method: 'POST',-->
+<!--            headers: {-->
+<!--                'Content-Type': 'application/json'-->
+<!--            },-->
+<!--            body: JSON.stringify({ services: selectedServices })-->
+<!--        })-->
+<!--        .then(response => response.json())-->
+<!--        .then(data => {-->
+<!--            if (selectedServices.includes('service2')) { // Bank Transaction Data-->
+<!--                    fetch('http://127.0.0.1:8000/create_link_token', {-->
+<!--                method: 'POST',-->
+<!--                headers: {-->
+<!--                    'Content-Type': 'application/json'-->
+<!--                }-->
+<!--            })-->
+<!--            .then(response => response.json())-->
+<!--            .then(data => {-->
+<!--                const linkToken = data.link_token;-->
+<!--                const handler = Plaid.create({-->
+<!--                    token: linkToken,-->
+<!--                    onSuccess: (publicToken, metadata) => {-->
+<!--                        fetch('http://127.0.0.1:8000/set_access_token', {-->
+<!--                            method: 'POST',-->
+<!--                            headers: {-->
+<!--                                'Content-Type': 'application/json'-->
+<!--                            },-->
+<!--                            body: JSON.stringify({ public_token: publicToken })-->
+<!--                        })-->
+<!--                        .then(response => response.json())-->
+<!--                        .then(data => {-->
+<!--                            console.log('Access Token:', data.access_token);-->
+<!--                            fetchTransactions();-->
+<!--                        })-->
+<!--                        .catch(error => console.error('Error:', error));-->
+<!--                    },-->
+<!--                    onExit: (err, metadata) => {-->
+<!--                        if (err != null) {-->
+<!--                            console.error('Error:', err);-->
+<!--                        }-->
+<!--                    }-->
+<!--                });-->
+<!--                handler.open();-->
+<!--            })-->
+<!--            .catch(error => console.error('Error:', error));-->
+<!--            } else if (selectedServices.includes('service3')) {-->
+<!--                    fetch('http://127.0.0.1:8000/email_services', {-->
+<!--                    method: 'POST',-->
+<!--                    headers: {-->
+<!--                        'Content-Type': 'application/json'-->
+<!--                    },-->
+<!--                    body: JSON.stringify({ services: selectedServices })-->
+<!--                })-->
+<!--                .then(response => response.json())-->
+<!--                .then(data => {-->
+<!--                    console.log(data);-->
+<!--                })-->
+<!--                .catch(error => console.error('Error:', error));-->
+<!--            } else {-->
+<!--                fetch('http://127.0.0.1:8000/no_email_nor_transaction', {-->
+<!--                    method: 'POST',-->
+<!--                    headers: {-->
+<!--                        'Content-Type': 'application/json'-->
+<!--                    },-->
+<!--                    body: JSON.stringify({ services: selectedServices })-->
+<!--                })-->
+<!--                .then(response => response.json())-->
+<!--                .then(data => {-->
+<!--                    console.log(data);-->
+<!--                })-->
+<!--                .catch(error => console.error('Error:', error));-->
+<!--            }-->
+
+<!--        })-->
+<!--        .catch(error => console.error('Error:', error));-->
+
+<!--    });-->
+<!--    </script>-->
+<!--    <script>-->
+<!--        document.getElementById('linkButton2').addEventListener('click', function() {-->
+<!--            window.location.href = '/chat';-->
+<!--        });-->
+<!--    </script>-->
+<script>
+    var isEmailServiceCompleted = false;
+    var isNoEmailNorTransactionCompleted = false;
+    var isSetAccessTokenCompleted = false;
+
+    function checkAllServicesCompleted() {
+        if (isEmailServiceCompleted && isNoEmailNorTransactionCompleted && isSetAccessTokenCompleted) {
+            document.getElementById('linkButton2').style.display = 'block';
+        }
+    }
+
+    document.getElementById('linkButton').addEventListener('click', function() {
+        const selectedServices = Array.from(document.querySelectorAll('input[name="service"]:checked')).map(input => input.value);
+
+        fetch('http://127.0.0.1:8000/selected_services', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({services: selectedServices})
+        }).then(() => {
+            if (selectedServices.includes('service2')) {
+                fetch('http://127.0.0.1:8000/create_link_token', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'}
+                }).then(response => response.json())
+                .then(data => {
+                    const linkToken = data.link_token;
+                    const handler = Plaid.create({
+                        token: linkToken,
+                        onSuccess: (publicToken, metadata) => {
+                            fetch('http://127.0.0.1:8000/set_access_token', {
+                                method: 'POST',
+                                headers: {'Content-Type': 'application/json'},
+                                body: JSON.stringify({public_token: publicToken})
+                            }).then(() => {
+                                isSetAccessTokenCompleted = true;
+                                checkAllServicesCompleted();
+                            });
+                        },
+                        onExit: (err, metadata) => { /* Error Handling */ }
+                    });
+                    handler.open();
+                });
+            } else {
+                isSetAccessTokenCompleted = true; // No bank service selected
+            }
+
+            if (!selectedServices.includes('service2') && selectedServices.includes('service3')) {
+                fetch('http://127.0.0.1:8000/email_services', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({services: selectedServices})
+                }).then(() => {
+                    isEmailServiceCompleted = true;
+                    checkAllServicesCompleted();
+                });
+            } else {
+                isEmailServiceCompleted = true; // No email service selected
+            }
+
+            fetch('http://127.0.0.1:8000/no_email_nor_transaction', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({services: selectedServices})
+            }).then(() => {
+                isNoEmailNorTransactionCompleted = true;
+                checkAllServicesCompleted();
+            });
+        });
+    });
+
+    document.getElementById('linkButton2').addEventListener('click', function() {
+        window.location.href = '/chat';
+    });
+</script>
+
+
+
+
+</body>
+</html>

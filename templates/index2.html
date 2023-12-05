@@ -1,0 +1,218 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+
+    <title>Dashboard</title>
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+
+    <!-- Fontawesome Sytle CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+
+    <!-- Style CSS -->
+    <link rel="stylesheet" href="/static/styles2.css">
+      <script src="https://cdn.plaid.com/link/v2/stable/link-initialize.js"></script>
+
+  </head>
+  <body>
+
+    <div class="allWrapper">
+        <header class="header" id="header">
+
+        </header><!-- end of header -->
+
+        <section class="quiz_section" id="quizeSection">
+            <div class="container">
+                <div class="row">
+                    <div class="col-sm-12">
+                        <div class="quiz_area">
+<!--                            <div class="quiz_backBtn_progressBar">-->
+<!--                                <a href="#" class="quiz_backBtn"><i class="fa fa-arrow-left" aria-hidden="true"></i></a>-->
+<!--                                <div class="progress">-->
+                                    <div class="progress-bar progress-bar-striped" role="progressbar" style="width: 10%" aria-valuenow="10" aria-valuemin="0" aria-valuemax="100"></div>
+<!--                                </div>-->
+<!--                            </div>&lt;!&ndash; end of quiz_backBtn_progressBar &ndash;&gt;-->
+                        </div><!-- end of quiz_area -->
+
+                    </div><!-- end of col12 -->
+
+                    <div class="col-sm-12">
+                        <div class="quiz_content_area">
+                            <h1 class="quiz_title">Select What You Want to Chat with</h1>
+
+                            <div class="row">
+                                <div class="col-sm-3">
+                                    <div class="quiz_card_area">
+                                        <input class="quiz_checkbox" type="checkbox" id="service1" value="service1" />
+                                        <div class="single_quiz_card">
+                                            <div class="quiz_card_content">
+                                                <div class="quiz_card_icon">
+                                                    <div class="quiz_icon quiz_icon1"></div>
+                                                </div><!-- end of quiz_card_media -->
+
+                                                <div class="quiz_card_title">
+                                                        <h3><i class="fa fa-check" aria-hidden="true"></i> Web Bookmark </h3>
+                                                </div><!-- end of quiz_card_title -->
+                                            </div><!-- end of quiz_card_content -->
+                                        </div><!-- end of single_quiz_card -->
+                                    </div><!-- end of quiz_card_area -->
+                                </div><!-- end of col3  -->
+
+                                <div class="col-sm-3">
+                                    <div class="quiz_card_area">
+                                        <input class="quiz_checkbox" type="checkbox" id="service2" value="service2" />
+                                        <div class="single_quiz_card">
+                                            <div class="quiz_card_content">
+                                                <div class="quiz_card_icon">
+                                                    <div class="quiz_icon quiz_icon2"></div>
+                                                </div><!-- end of quiz_card_media -->
+
+                                                <div class="quiz_card_title">
+                                                        <h3><i class="fa fa-check" aria-hidden="true"></i> Bank Transactions </h3>
+                                                </div><!-- end of quiz_card_title -->
+                                            </div><!-- end of quiz_card_content -->
+                                        </div><!-- end of single_quiz_card -->
+                                    </div><!-- end of quiz_card_area -->
+                                </div><!-- end of col3  -->
+
+                                <div class="col-sm-3">
+                                    <div class="quiz_card_area">
+                                        <input class="quiz_checkbox" type="checkbox" id="service3" value="service3" />
+                                        <div class="single_quiz_card">
+                                            <div class="quiz_card_content">
+                                                <div class="quiz_card_icon">
+                                                    <div class="quiz_icon quiz_icon3"></div>
+                                                </div><!-- end of quiz_card_media -->
+
+                                                <div class="quiz_card_title">
+                                                        <h3><i class="fa fa-check" aria-hidden="true"></i> Gmail </h3>
+                                                </div><!-- end of quiz_card_title -->
+                                            </div><!-- end of quiz_card_content -->
+                                        </div><!-- end of single_quiz_card -->
+                                    </div><!-- end of quiz_card_area -->
+                                </div><!-- end of col3  -->
+
+                                <div class="col-sm-3">
+                                    <div class="quiz_card_area">
+                                        <input class="quiz_checkbox" type="checkbox" id="service4" value="service4" />
+                                        <div class="single_quiz_card">
+                                            <div class="quiz_card_content">
+                                                <div class="quiz_card_icon">
+                                                    <div class="quiz_icon quiz_icon4"></div>
+                                                </div><!-- end of quiz_card_media -->
+
+                                                <div class="quiz_card_title">
+                                                        <h3><i class="fa fa-check" aria-hidden="true"></i> PDF Files</h3>
+                                                </div><!-- end of quiz_card_title -->
+                                            </div><!-- end of quiz_card_content -->
+                                        </div><!-- end of single_quiz_card -->
+                                    </div><!-- end of quiz_card_area -->
+                                </div><!-- end of col3  -->
+
+                                <div class="col-sm-12">
+                                    <div class="quiz_next_container">
+                                    <div class="quiz_next">
+                                        <button id="upload" class="quiz_continueBtn">Upload to Database</button>
+                                    </div><!-- end of quiz_next -->
+                                    <div class="quiz_next">
+                                        <button id="ask" class="quiz_continueBtn" style="display: none;">Ask Anything</button>
+                                    </div><!-- end of quiz_next -->
+                                    </div>
+                                </div><!-- end of col12 -->
+
+                            </div><!-- end of quiz_card_area -->
+                        </div><!-- end of quiz_content_area -->
+
+                    </div><!-- end of col12 -->
+                </div><!-- end of row -->
+            </div><!-- end of container -->
+        </section><!-- end of quiz_section -->
+    </div><!-- end of allWrapper -->
+
+    <!-- Optional JavaScript -->
+    <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+    <script>
+        var isEmailServiceCompleted = false;
+        var isNoEmailNorTransactionCompleted = false;
+        var isSetAccessTokenCompleted = false;
+
+        function checkAllServicesCompleted() {
+            if (isEmailServiceCompleted && isNoEmailNorTransactionCompleted && isSetAccessTokenCompleted) {
+                document.getElementById('ask').style.display = 'block';
+            }
+        }
+
+        document.getElementById('upload').addEventListener('click', function() {
+            const selectedServices = Array.from(document.querySelectorAll('.quiz_checkbox:checked')).map(input => input.value);
+
+            fetch('http://127.0.0.1:8000/selected_services', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({services: selectedServices})
+            }).then(() => {
+                if (selectedServices.includes('service2')) {
+                    fetch('http://127.0.0.1:8000/create_link_token', {
+                        method: 'POST',
+                        headers: {'Content-Type': 'application/json'}
+                    }).then(response => response.json())
+                    .then(data => {
+                        const linkToken = data.link_token;
+                        const handler = Plaid.create({
+                            token: linkToken,
+                            onSuccess: (publicToken, metadata) => {
+                                fetch('http://127.0.0.1:8000/set_access_token', {
+                                    method: 'POST',
+                                    headers: {'Content-Type': 'application/json'},
+                                    body: JSON.stringify({public_token: publicToken})
+                                }).then(() => {
+                                    isSetAccessTokenCompleted = true;
+                                    checkAllServicesCompleted();
+                                });
+                            },
+                            onExit: (err, metadata) => { /* Error Handling */ }
+                        });
+                        handler.open();
+                    });
+                } else {
+                    isSetAccessTokenCompleted = true; // No bank service selected
+                }
+
+                if (!selectedServices.includes('service2') && selectedServices.includes('service3')) {
+                    fetch('http://127.0.0.1:8000/email_services', {
+                        method: 'POST',
+                        headers: {'Content-Type': 'application/json'},
+                        body: JSON.stringify({services: selectedServices})
+                    }).then(() => {
+                        isEmailServiceCompleted = true;
+                        checkAllServicesCompleted();
+                    });
+                } else {
+                    isEmailServiceCompleted = true; // No email service selected
+                }
+
+                fetch('http://127.0.0.1:8000/no_email_nor_transaction', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({services: selectedServices})
+                }).then(() => {
+                    isNoEmailNorTransactionCompleted = true;
+                    checkAllServicesCompleted();
+                });
+            });
+        });
+
+        document.getElementById('ask').addEventListener('click', function() {
+            window.location.href = '/chat';
+        });
+    </script>
+
+  </body>
+</html>
