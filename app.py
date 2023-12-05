@@ -47,6 +47,10 @@ count = 0
 
 load_dotenv()
 
+'''
+API Keys
+'''
+
 PINECONE_API_KEY = ''
 PINECONE_API_ENV = ''
 
@@ -55,6 +59,10 @@ PLAID_CLIENT_ID = ''
 PLAID_SANDBOX = ''
 user_name = ''
 CHUNK_SIZE = 2000
+
+'''
+Pinecone & Get Embeddings
+'''
 
 embeddings = OpenAIEmbeddings(openai_api_key=OPENAI_API_KEY)
 pinecone.init(
@@ -78,7 +86,9 @@ client = plaid_api.PlaidApi(api_client)
 access_token = None
 item_id = None
 
-
+'''
+FastAPI
+'''
 
 app = FastAPI()
 app.add_middleware(
@@ -145,6 +155,10 @@ class ServiceSelection(BaseModel):
     services: List[str]
 
 
+'''
+Get User Data
+'''
+
 selected_services = []
 @app.post("/selected_services")
 async def handle_selected_services(selection: ServiceSelection):
@@ -181,11 +195,6 @@ def get_dashboard(request: Request):
 def get_index(request: Request):
     return templates.TemplateResponse("chat.html", {"request": request})
 
-# @app.get("/index2")
-# def get_index2(request: Request):
-#     return templates.TemplateResponse("index2.html", {"request": request})
-
-
 @app.post("/set_access_token")
 async def set_access_token(token_request: TokenRequest):
     public_token = token_request.public_token
@@ -211,7 +220,6 @@ async def set_access_token(token_request: TokenRequest):
         return JSONResponse(content=jsonable_encoder(response.to_dict()))
     except plaid.ApiException as e:
         return json.loads(e.body)
-
 
 @app.post("/create_link_token")
 async def create_link_token():
@@ -251,10 +259,19 @@ def get_transactions_from_plaid():
 
     return response.to_dict()
 
-
 async def process_transactions():
     make_json()
     insert_transaction_to_pinecone()
+
+
+
+
+
+############################################################################################################
+################## Generate Response #######################################################################
+############################################################################################################
+
+
 
 def read_ith_entry_from_json(file_path, i):
     # Read the JSON file
@@ -510,6 +527,7 @@ def insert_transaction_to_pinecone():
         upsert_transaction_to_pinecone(data[no])
 
 
+# GMAIL API #
 #==========================================================================================
 #==========================================================================================
 #==========================================================================================
