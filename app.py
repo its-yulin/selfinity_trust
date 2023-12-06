@@ -325,7 +325,7 @@ def generate_evidence(evidence, response):
 
 # differentiate command type (avoid redundant checks on greetings)
 def check_greetings(response):
-    counter_evidence_prompt = f"Can you check whether this is an answer to greetings/chitchat? '{response['result']}'? " \
+    counter_evidence_prompt = f"Can you check whether this is an answer to greetings (like how are you), chitchat, giving/replying to thanks or include anything saying that I'm just an AI? '{response['result']}'? " \
                               "Return only yes or no."
     counter_evidence = openai.ChatCompletion.create(
         model="gpt-4",
