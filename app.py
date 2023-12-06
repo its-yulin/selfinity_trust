@@ -43,27 +43,22 @@ import sqlite3
 import pandas as pd
 import os
 
+# id counter
 count = 0
 
 load_dotenv()
 
-'''
-API Keys
-'''
-
+# load API keys
 PINECONE_API_KEY = ''
 PINECONE_API_ENV = ''
 
-OPENAI_API_KEY = ''
+OPENAI_API_KEY = ""
 PLAID_CLIENT_ID = ''
 PLAID_SANDBOX = ''
 user_name = ""
 CHUNK_SIZE = 2000
 
-'''
-Pinecone & Get Embeddings
-'''
-
+# set up openai embedding
 embeddings = OpenAIEmbeddings(openai_api_key=OPENAI_API_KEY)
 pinecone.init(
     api_key=PINECONE_API_KEY,  # find at app.pinecone.io
@@ -72,7 +67,7 @@ pinecone.init(
 index_name = "personal-database"  # put in the name of your pinecone index here
 index = pinecone.Index('personal-database')
 
-
+# set up plaid api
 host = plaid.Environment.Sandbox
 configuration = plaid.Configuration(
     host=host,
@@ -86,10 +81,8 @@ client = plaid_api.PlaidApi(api_client)
 access_token = None
 item_id = None
 
-'''
-FastAPI
-'''
 
+# initialize FastAPI
 app = FastAPI()
 app.add_middleware(
     CORSMiddleware,
@@ -103,7 +96,7 @@ app.mount("/static", StaticFiles(directory="static"), name="static")
 templates = Jinja2Templates(directory="templates")
 openai.api_key = os.getenv("OPENAI_API_KEY")
 
-
+# designate llm model for chat bot
 llm = ChatOpenAI(model="gpt-4",temperature=1, openai_api_key=OPENAI_API_KEY)
 text_field = 'text'
 vector_store = Pinecone.from_existing_index(index_name=index_name,embedding=embeddings,text_key=text_field)
@@ -124,6 +117,8 @@ You are a helpful and honest AI assistant that will always help human. Consider 
 {question}
 Answer:
 """
+
+# add history, context, question in the prompt
 prompt = PromptTemplate(
     input_variables=["history", "context", "question"],
     template=template,
@@ -154,17 +149,14 @@ class Message(BaseModel):
 class ServiceSelection(BaseModel):
     services: List[str]
 
-
-'''
-Get User Data
-'''
-
+# data source selection page
 selected_services = []
 @app.post("/selected_services")
 async def handle_selected_services(selection: ServiceSelection):
     global selected_services
     selected_services = selection.services
 
+# retrieve gmail and upload to database
 @app.post("/email_services")
 async def email_services(selection: ServiceSelection):
     if "service2" not in selection.services:
@@ -175,6 +167,7 @@ async def email_services(selection: ServiceSelection):
         if "service4" in selected_services:
             insert_pdf_to_pinecone()
 
+# if no update on email or transactions
 @app.post("/no_email_nor_transaction")
 async def no_email_nor_transaction(selection: ServiceSelection):
     if "service2" not in selected_services and "service3" not in selected_services:
@@ -183,18 +176,22 @@ async def no_email_nor_transaction(selection: ServiceSelection):
         if "service4" in selected_services:
             insert_pdf_to_pinecone()
 
+# landing page
 @app.get("/", response_class=HTMLResponse)
 def get_homepage(request: Request):
     return templates.TemplateResponse("index.html", {"request": request})
 
+# dashboard page
 @app.get("/dashboard", response_class=HTMLResponse)
 def get_dashboard(request: Request):
     return templates.TemplateResponse("index2.html", {"request": request})
 
+# chat page
 @app.get("/chat")
 def get_index(request: Request):
     return templates.TemplateResponse("chat.html", {"request": request})
 
+# set_access token for plaid api
 @app.post("/set_access_token")
 async def set_access_token(token_request: TokenRequest):
     public_token = token_request.public_token
@@ -221,6 +218,8 @@ async def set_access_token(token_request: TokenRequest):
     except plaid.ApiException as e:
         return json.loads(e.body)
 
+
+# create link token
 @app.post("/create_link_token")
 async def create_link_token():
     link_token_request = LinkTokenCreateRequest(
@@ -235,6 +234,7 @@ async def create_link_token():
     response = client.link_token_create(link_token_request)
     return JSONResponse(content=jsonable_encoder(response.to_dict()))
 
+# get transaction from plaid api
 def get_transactions_from_plaid():
     request = TransactionsGetRequest(
         access_token=access_token,
@@ -259,20 +259,13 @@ def get_transactions_from_plaid():
 
     return response.to_dict()
 
+
+# dump transactions to json
 async def process_transactions():
     make_json()
     insert_transaction_to_pinecone()
 
-
-
-
-
-############################################################################################################
-################## Generate Response #######################################################################
-############################################################################################################
-
-
-
+# helper function for json read
 def read_ith_entry_from_json(file_path, i):
     # Read the JSON file
     with open(file_path, 'r') as file:
@@ -281,13 +274,13 @@ def read_ith_entry_from_json(file_path, i):
     ith_entry = data["chunk"][i]
     return ith_entry
 
-
+# helper function for json write
 def write_to_json(file_path, data):
     # Write data to a JSON file
     with open(file_path, 'w') as file:
         json.dump(data, file, indent=4)
 
-
+# determine the type of feedback for evidence
 def find_type(metadata):
     source = metadata['source']
 
@@ -314,6 +307,7 @@ def find_type(metadata):
         pass
 
 
+# generate evidence and logic-checker
 def generate_evidence(evidence, response):
     counter_evidence_prompt = f"Given the evidence '{evidence}', is this statement accurate: '{response['result']}'? Provide explanation within 30 words. " \
                               "Return in json format in the form of {\"trust_type\":\"yes/no\", \"explanation\": \"explanation\"}"
@@ -329,8 +323,9 @@ def generate_evidence(evidence, response):
     return counter_evidence_dict
 
 
+# differentiate command type (avoid redundant checks on greetings)
 def check_greetings(response):
-    counter_evidence_prompt = f"Can you check whether this is an answer to greetings (like how are you), chitchat, giving/replying to thanks or include anything saying that I'm just an AI? '{response['result']}'? " \
+    counter_evidence_prompt = f"Can you check whether this is an answer to greetings/chitchat? '{response['result']}'? " \
                               "Return only yes or no."
     counter_evidence = openai.ChatCompletion.create(
         model="gpt-4",
@@ -338,22 +333,23 @@ def check_greetings(response):
         max_tokens=100
     )
     answer = counter_evidence["choices"][0]["message"]["content"]
+    print("yesyes")
 
     return answer.lower().strip() == "yes"
 
 
-
+# find the most frequent metadata
 def most_common(metadata_types):
     count = Counter(metadata_types)
     most_common = sorted(count, key=lambda x: (-count[x], metadata_types.index(x)))[0]
     return most_common
 
-
+# filter the most frequent metadata
 def filter_by_most_common(metadata_container, metadata_types, source_type):
     filtered_metadata = [metadata for metadata, type_ in zip(metadata_container, metadata_types) if type_ == source_type]
     return filtered_metadata
 
-
+# filter and save transaction and dump to json
 def filter_and_save_transactions(file_path, output_file_name, metadata_container_filtered):
     with open(file_path, 'r') as file:
         data = json.load(file)
@@ -370,13 +366,13 @@ def filter_and_save_transactions(file_path, output_file_name, metadata_container
 
     return {output_file_name: output_file_name_real}
 
-
+# find the title for json data entry
 def find_title(metadata_container_filtered):
     titles_paths = {source.split('/')[-1].replace('.pdf', ''): 'static/' + source for item in metadata_container_filtered for source in [item['source']]}
     json_output = json.dumps(titles_paths, indent=None)
     return json_output
 
-
+# process the format of response
 def create_response_object(response_result, metadata_type, source_value, counter_evidence_response):
     return {
         "response": response_result,
@@ -387,7 +383,7 @@ def create_response_object(response_result, metadata_type, source_value, counter
         "trust": counter_evidence_response
     }
 
-
+# generate chat message
 async def generate(messages: List[Message], model_type: str):
     global rag_pipeline
     try:
@@ -402,7 +398,7 @@ async def generate(messages: List[Message], model_type: str):
             if(check_greetings(response)):
                 source_type = "greeting"
                 source_value = "greeting"
-                explain = '{"trust_type": "yes", "explanation": "There are no factual contents here :)"}'
+                explain = '{"trust_type": "yes", "explanation": "This is a greeting."}'
                 is_greeting = create_response_object(response['result'], source_type, source_value, explain)
                 yield is_greeting
                 return
@@ -440,6 +436,7 @@ async def generate(messages: List[Message], model_type: str):
         yield f"{type(e).__name__}: {str(e)}"
 
 
+# GPT request
 class Gpt4Request(BaseModel):
     messages: List[Message]
     model_type: str
@@ -453,6 +450,7 @@ async def gpt4(request: Gpt4Request):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
+# dump transaction to json
 def make_json():
     data = get_transactions_from_plaid()
 
@@ -481,7 +479,7 @@ def make_json():
     with open("transactions.json", "w") as outfile:
         json.dump(TRANSACTION_DICT_OUT, outfile)
 
-
+# upsert transaction data to pinecone database
 def insert_transaction_to_pinecone():
     file_path = os.path.join('transactions.json')
 
@@ -493,8 +491,6 @@ def insert_transaction_to_pinecone():
     data = loader.load()
 
     no_of_transactions = len(data)
-
-
 
     def upsert_transaction_to_pinecone(data):
         global count, embeddings, index
@@ -526,7 +522,6 @@ def insert_transaction_to_pinecone():
         upsert_transaction_to_pinecone(data[no])
 
 
-# GMAIL API #
 #==========================================================================================
 #==========================================================================================
 #==========================================================================================
@@ -543,7 +538,7 @@ EMAIL_LIST = []
 EMAIL_DICT = dict()
 EMAIL_DICT_OUT = dict()
 
-
+# gmail authentication
 def gmail_authenticate():
     SCOPES = ['https://mail.google.com/']
     creds = None
@@ -559,12 +554,13 @@ def gmail_authenticate():
             token.write(creds.to_json())
     return build('gmail', 'v1', credentials=creds)
 
-
+# clean text
 def clean(text):
     # clean text for creating a folder
     return "".join(c if c.isalnum() else "_" for c in text)
 
 
+# parse email data
 def parse_parts(service, parts, folder_name, message):
     """
     Utility function that parses the content of an email partition
@@ -589,6 +585,7 @@ def parse_parts(service, parts, folder_name, message):
                     EMAIL_DICT['content'] = text
 
 
+# read email message
 def read_message(service, number_of_emails):
     """
     This function takes Gmail API `service` and the given `message_id` and does the following:
@@ -631,6 +628,7 @@ def read_message(service, number_of_emails):
         EMAIL_LIST.append(EMAIL_DICT)
         EMAIL_DICT = dict()
 
+# extract gmail api
 def extract_gmail_api_start():
     service = gmail_authenticate()
     read_message(service, 20)
@@ -640,7 +638,7 @@ def extract_gmail_api_start():
 
     insert_email_to_pinecone()
 
-
+# upsert email to pinecone database
 def insert_email_to_pinecone():
     file_path = os.path.join('email.json')
     data = json.loads(Path(file_path).read_text())
@@ -702,6 +700,7 @@ CHUNK_SIZE = 2000
 ##  LOAD BOOKMARK
 ########################################################################
 
+# upsert bookmark/ web history to pinecone database
 def insert_bookmark_to_pinecone():
     ### Load your bookmark data
     CHROME_BOOKMARK_PATH = f"/Users/{user_name}/Library/Application Support/Google/Chrome/Default/History"
@@ -777,6 +776,7 @@ def insert_bookmark_to_pinecone():
         last_visit_time = row["last_visit_time"]
         upload_html_to_pinecone_helper(row)
 
+# upsert local documents to pinecone database
 def insert_pdf_to_pinecone():
     path = "pdf"
     dir_list = os.listdir(path)
@@ -814,6 +814,7 @@ def insert_pdf_to_pinecone():
         except Exception as e:
             pass
 
+# define a custom upsert for users to input note
 def custom_upsert(data):
     global count
     global index, embeddings
